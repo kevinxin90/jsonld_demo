@@ -36,47 +36,6 @@ def nquads_transform(doc):
     nquads = t.parse_nquads(jsonld.to_rdf(doc, {'format': 'application/nquads'}))['@default']
     return nquads
 
-def add_context(doc, context):
-    '''
-    add jsonld context to the document
-    not the root part of context
-    '''
-    for key in context:
-        keys = key.split('/')
-        try:
-            doc_new = find_doc(doc, keys)
-            if type(doc_new) == list:
-                for _d in doc_new:
-                    _d.update(context[key])
-            elif type(doc_new) == dict:
-                doc_new.update(context[key])
-            else:
-                print('error')
-        except:
-            continue
-            print('keyerror')
-    return doc
-
-def find_doc(k, keys):
-    n = len(keys)
-    for i in range(n):
-        # if k is a dictionary, then directly get its value
-        if type(k) == dict:
-            k = k[keys[i]]
-        # if k is a list, then loop through k
-        elif type(k) == list:
-            tmp = []
-            for item in k:
-                try:
-                    if type(item[keys[i]]) == dict:
-                        tmp.append(item[keys[i]])
-                    elif type(item[keys[i]]) == list:
-                        for _item in item[keys[i]]:
-                            tmp.append(_item)
-                except:
-                    continue
-            k = tmp
-    return k
 
 def jsonld_converter(json_doc, api):
     '''
@@ -84,11 +43,10 @@ def jsonld_converter(json_doc, api):
     transform it into jsonld_format
     '''
     context = load_context(api)
-    json_doc.update(context.pop('root'))
-    jsonld_doc = add_context(json_doc, context)
+    json_doc.update(context)
     return jsonld_doc
 
-def fetch_value(nquads, uri):
+def fetch_value_by_uri(nquads, uri):
     '''
     give a nquads and a uri,
     find all values related to this uri
@@ -105,17 +63,6 @@ def fetch_value(nquads, uri):
     else:
         return value
 
-def find_top_level_uri(nquads_id, nquads, api):
-    for item in nquads:
-        if item['object']['value'] == nquads_id:
-            top_level_uris = AVAILABLE_API_SOURCES[api]['jsonld']['data_source_uris']
-            if item['predicate']['value'] in top_level_uris:
-                uri = item['predicate']['value']
-            elif item['predicate']['value'] not in top_level_uris:
-                uri = find_top_level_uri(item['subject']['value'], nquads, api)
-            else:
-                print("couldn't find top level uri")
-    return uri
 
 def get_uri_list(nquads):
     '''
