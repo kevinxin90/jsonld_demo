@@ -1,17 +1,20 @@
 from biothings_helper import find_annotate_api_ids, find_query_api_ids, find_value_from_output_type, query_ids_from_output_type
 
 
-def list_handler(input_id_list, input_type, output_type):
-	output_id_list = []
-	for _input_id in input_id_list:
-		ih = IdHandler(_input_id, input_type)
-		output_ids = ih.retrieve_id(output_type)
-		if type(output_ids) == list:
-			for _output_id in output_ids:
-				output_id_list.append(_output_id)
-		else:
-			output_id_list.append(output_ids)
-	return output_id_list
+class IdListHandler():
+
+	def list_handler(self, input_id_list, input_type, output_type):
+		output_id_list = []
+		for _input_id in input_id_list:
+			ih = IdHandler(_input_id, input_type)
+			output_ids = ih.retrieve_id(output_type)
+			if type(output_ids) == list:
+				for _output_id in output_ids:
+					output_id_list.append(_output_id)
+			else:
+				output_id_list.append(output_ids)
+		return output_id_list
+
 
 class IdHandler():
 	'''
